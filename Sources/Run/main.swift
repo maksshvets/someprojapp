@@ -22,4 +22,35 @@ try config.setup()
 let drop = try Droplet(config)
 try drop.setup()
 
+drop.get { request in
+    return "Hello"
+}
+
+drop.get("/name",":name") { request in
+    if let name = request.parameters["name"]?.string {
+        return "Hello \(name)!"
+    }
+    return "Error retrieving parameters."
+}
+
+drop.get("/json") { request in
+    return try JSON(node: [
+        "message" : "Some message text"
+        ])
+}
+
+drop.get("/view") { request in
+    return try drop.view.make("view.html")
+}
+
+drop.post("post") { request in
+    guard let name = request.data["name"]?.string else {
+        throw Abort.badRequest
+    }
+    
+    return try JSON(node: [
+        "message" : "Hello, \(name)!"
+        ])
+}
+
 try drop.run()
